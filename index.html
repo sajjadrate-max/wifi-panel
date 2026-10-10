@@ -1,0 +1,599 @@
+<title>Tenda Router Panel</title>
+<style>
+/* Layout: top orange bar (with mobile hamburger), left sidebar / mobile slide-out menu, scrolling card panels, sticky OK/Cancel footer. Single light theme to match the real device UI. */
+:root{
+  --orange:#f07c1a;
+  --orange-ink:#ee7a1b;
+  --green:#7bc043;
+  --green-dark:#6fb23a;
+  --blue:#2f7ff0;
+  --bg:#ececec;
+  --sidebar:#f4f4f4;
+  --card:#ffffff;
+  --fg:#363636;
+  --muted:#9a9a9a;
+  --label:#5f5f5f;
+  --line:#e7e7e7;
+  --field-line:#d8d8d8;
+  --section:#8a8a8a;
+  color-scheme:light;
+  font-family:"Segoe UI",Roboto,-apple-system,Arial,"Noto Sans",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.pen{cursor:pointer}
+body{background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5}
+button{font-family:inherit}
+h1,h2,h3{margin:0}
+
+/* ---------------- LOGIN ---------------- */
+#login{min-height:100%;background:#fff;display:flex;align-items:flex-start;justify-content:center;padding:14vh 18px 40px}
+.login-card{width:100%;max-width:430px;background:#fff;border:1px solid #f0f0f0;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:30px 26px 34px}
+.login-top{display:flex;justify-content:space-between;color:#b9b9b9;font-size:20px;margin-bottom:22px}
+.brand{color:var(--orange-ink);font-weight:800;font-style:italic;letter-spacing:.5px;text-align:center;font-size:40px;margin:4px 0 26px}
+.field{position:relative;display:flex;align-items:center;border:1px solid var(--blue);border-radius:6px;padding:0 44px 0 42px;height:52px;margin-bottom:26px}
+.field .lk{position:absolute;left:14px;color:#555}
+.field input{border:0;outline:0;width:100%;height:100%;font-size:16px;background:transparent;color:var(--fg)}
+.field .eye{position:absolute;right:12px;background:none;border:0;cursor:pointer;color:#c2c2c2;font-size:18px;line-height:1}
+.btn-login{width:100%;height:56px;background:var(--green);color:#fff;border:0;border-radius:6px;font-size:19px;cursor:pointer}
+.btn-login:hover{background:var(--green-dark)}
+.forgot{display:block;margin-top:20px;color:#b7b7b7;font-size:15px;cursor:default}
+
+/* ---------------- APP SHELL ---------------- */
+#app{min-height:100%;display:flex;flex-direction:column}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--orange);color:#fff;
+  display:flex;align-items:center;justify-content:space-between;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.topbar .brand{font-size:24px;margin:0;color:#fff}
+.topbar .right{display:flex;gap:16px;align-items:center;font-size:13px}
+.topbar .right span{cursor:pointer;opacity:.95}
+.hamb{display:none;background:none;border:0;color:#fff;cursor:pointer;padding:4px;line-height:0}
+.hamb svg{width:26px;height:26px}
+.layout{display:flex;align-items:flex-start;flex:1}
+
+/* sidebar / mobile menu */
+.backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35}
+.backdrop.show{display:block}
+.sidebar{width:150px;flex:0 0 150px;background:var(--sidebar);align-self:stretch;padding:10px 10px 30px;
+  position:sticky;top:calc(48px + env(safe-area-inset-top,0px));min-height:calc(100vh - 48px)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:13px 10px;color:#555;font-size:14px;cursor:pointer;border-radius:4px;border:1px solid transparent}
+.nav-item svg{width:18px;height:18px;flex:0 0 18px;stroke:#8a8a8a;fill:none;stroke-width:1.7}
+.nav-item:hover{color:#333}
+.nav-item.active{background:#fff;color:var(--orange-ink);border-color:#dedede;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.nav-item.active svg{stroke:var(--orange-ink)}
+
+/* content */
+.content{flex:1;min-width:0;padding:16px 16px 90px}
+.panel{display:none}
+.panel.active{display:block}
+.sec-title{color:var(--section);font-size:13px;margin:18px 2px 8px}
+.sec-title:first-child{margin-top:2px}
+.card{background:var(--card);border-radius:8px;padding:16px 16px 18px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+
+.row{display:flex;align-items:flex-start;gap:12px;padding:10px 2px;flex-wrap:wrap}
+.row .lbl{flex:0 0 130px;color:var(--label);font-size:13.5px;padding-top:6px}
+.row .val{flex:1;min-width:150px}
+.hint{color:var(--muted);font-size:12.5px;margin-top:4px}
+.ctrl{height:38px;border:1px solid var(--field-line);border-radius:5px;padding:0 10px;font-size:14px;background:#fff;color:var(--fg);width:200px;max-width:100%}
+select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23888' stroke-width='1.5'><path d='M1 1l4 4 4-4'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
+.pwd-wrap{position:relative;display:inline-block;max-width:100%}
+.pwd-wrap .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:#c2c2c2;cursor:pointer}
+
+/* toggle switch */
+.sw{position:relative;display:inline-block;width:46px;height:24px;flex:0 0 46px}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw .slider{position:absolute;inset:0;background:#cfcfcf;border-radius:24px;transition:.2s;cursor:pointer}
+.sw .slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.sw input:checked + .slider{background:var(--green)}
+.sw input:checked + .slider:before{transform:translateX(22px)}
+
+/* radio group */
+.radios{display:flex;gap:22px;flex-wrap:wrap;align-items:center;padding-top:6px}
+.rad{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:14px;color:var(--fg)}
+.rad input{appearance:none;width:16px;height:16px;border:1px solid #bdbdbd;border-radius:50%;position:relative;margin:0;cursor:pointer}
+.rad input:checked{border-color:var(--blue)}
+.rad input:checked:before{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.rad small{color:var(--muted);font-size:12px}
+
+/* checkbox */
+.chk{appearance:none;width:16px;height:16px;border:1px solid #bdbdbd;border-radius:3px;position:relative;cursor:pointer;margin:0;vertical-align:-3px}
+.chk:checked{background:var(--blue);border-color:var(--blue)}
+.chk:checked:after{content:"";position:absolute;left:5px;top:1px;width:4px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.chk-row{display:inline-flex;align-items:center;gap:8px;color:var(--label)}
+
+/* status page */
+.conn{display:flex;align-items:center;justify-content:space-between;max-width:420px;margin:6px auto 4px;gap:4px}
+.conn .node{text-align:center;flex:0 0 auto}
+.conn .node svg{width:62px;height:52px;stroke:#7bc043;fill:none;stroke-width:1.6}
+.conn .node div{font-size:12px;color:#777;margin-top:4px}
+.conn .link{flex:1;height:2px;background:#d9d9d9;margin:0 2px;margin-bottom:22px}
+.conn-ok{text-align:center;color:#6fb23a;font-size:13.5px;margin-top:6px}
+.speeds{display:flex;justify-content:space-around;text-align:center;gap:10px;flex-wrap:wrap}
+.speeds .big{font-size:30px;font-weight:700}
+.speeds .u{font-size:12px;color:#aaa;font-weight:400}
+.speeds .cap{font-size:12px;color:#888;margin-top:2px}
+.n1{color:#2f9fe0}.n2{color:#7bc043}.n3{color:#f07c1a}
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:13.5px}
+.info-row:last-child{border-bottom:0}
+.info-row .k{color:var(--label)}
+.info-row .v{color:#555;text-align:right;font-variant-numeric:tabular-nums;word-break:break-word}
+
+/* device lists */
+.dev{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.dev:last-child{border-bottom:0}
+.ava{width:34px;height:34px;border-radius:50%;background:#e4edf5;color:#9fb4c7;display:flex;align-items:center;justify-content:center;flex:0 0 34px;font-weight:700}
+.dev .meta{flex:1;min-width:120px}
+.dev .nm{font-size:13.5px;color:#444;display:flex;align-items:center;gap:6px}
+.dev .nm .pen{color:#cfcfcf;font-size:12px}
+.dev .ip{font-size:11.5px;color:#9a9a9a}
+.dev .mac{font-size:11px;color:#bdbdbd}
+.dev .mid{flex:0 0 118px}
+.dev .mid select{width:118px;height:32px}
+.local{color:#9a9a9a;font-size:12px}
+.ptbl{width:100%;border-collapse:collapse;font-size:13px}
+.ptbl th{text-align:left;color:var(--section);font-weight:600;font-size:12.5px;padding:10px 6px;border-bottom:1px solid var(--line)}
+.ptbl td{padding:12px 6px;border-bottom:1px solid var(--line);color:#555;vertical-align:middle}
+.ptbl td .pen{color:#cfcfcf;margin-left:6px}
+.scrollx{overflow-x:auto}
+
+/* add-row (advanced) */
+.ghead{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;color:var(--section);font-size:12.5px;padding:4px 2px}
+.col3{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center}
+.plus{width:34px;height:34px;border-radius:50%;border:1px solid #d8d8d8;background:#fff;color:#bdbdbd;font-size:22px;line-height:1;cursor:pointer;flex:0 0 34px}
+.plus:hover{color:var(--orange);border-color:var(--orange)}
+.maccount{font-size:12px;color:var(--muted);padding:10px 2px 2px}
+.maccount b{color:var(--orange-ink)}
+.macrow{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:9px 2px;border-top:1px solid var(--line);font-size:13px}
+.macrow .mono{font-family:Consolas,monospace;color:#555}
+.macrow .rmk{color:#888}
+.rm{width:28px;height:28px;border-radius:6px;border:1px solid #e3b9b9;background:#fff;color:#d35b5b;cursor:pointer;font-size:16px;line-height:1;flex:0 0 28px}
+.rm:hover{background:#fdecec}
+
+/* device management */
+.mgmt-row{display:flex;align-items:center;gap:14px;padding:12px 2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mgmt-row:last-child{border-bottom:0}
+.mgmt-row .k{flex:0 0 150px;color:var(--label);font-size:13.5px}
+.gbtn{min-width:120px;height:38px;border:1px solid #d8d8d8;background:#f3f3f3;border-radius:5px;cursor:pointer;color:#555;font-size:13.5px}
+.gbtn:hover{background:#ececec}
+.timebox{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.timebox select{width:62px;height:34px}
+.daygrid{display:flex;gap:14px 16px;flex-wrap:wrap;padding-top:6px}
+.daygrid label{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#555}
+
+/* footer */
+.actions{position:sticky;bottom:0;z-index:20;background:var(--bg);display:flex;justify-content:flex-end;gap:10px;
+  padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid #dfdfdf}
+.btn-ok{background:var(--green);color:#fff;border:0;border-radius:5px;padding:0 26px;height:40px;font-size:14px;cursor:pointer}
+.btn-ok:hover{background:var(--green-dark)}
+.btn-cancel{background:#fff;color:#555;border:1px solid #d8d8d8;border-radius:5px;padding:0 22px;height:40px;font-size:14px;cursor:pointer}
+
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:#333;color:#fff;padding:10px 18px;border-radius:6px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+#toast.show{opacity:.95}
+
+/* ------- mobile: hamburger slide-out menu ------- */
+@media(max-width:760px){
+  .hamb{display:block}
+  .backdrop{top:0}
+  .sidebar{position:fixed;top:calc(48px + env(safe-area-inset-top,0px));right:0;left:auto;bottom:0;width:72%;max-width:300px;
+    min-height:0;transform:translateX(100%);transition:transform .25s;z-index:38;overflow-y:auto;box-shadow:-4px 0 16px rgba(0,0,0,.18)}
+  .sidebar.open{transform:translateX(0)}
+  .nav-item{padding:15px 12px;font-size:15px}
+  .row .lbl{flex-basis:100%}
+}
+</style>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login">
+  <form class="login-card" onsubmit="doLogin();return false;">
+    <div class="brand">Tenda</div>
+    <div class="field">
+      <span class="lk">&#128274;</span>
+      <input id="loginPwd" type="password" placeholder="Login Password" autocomplete="off">
+      <button type="button" class="eye" onclick="eye('loginPwd',this)" aria-label="Show password"></button>
+    </div>
+    <button class="btn-login" type="button" onclick="doLogin()">Login</button>
+    <span class="forgot">Forgot your password? &#9656;</span>
+  </form>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" hidden>
+  <div class="topbar">
+    <div class="brand">Tenda</div>
+    <div class="right">
+      <span onclick="logout()">Logout</span>
+      <span>English &#9662;</span>
+      <button class="hamb" onclick="toggleMenu()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop" onclick="toggleMenu(false)"></div>
+
+  <div class="layout">
+    <nav class="sidebar" id="nav">
+      <div class="nav-item active" data-p="status"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 5 4-12 2 7h6"/></svg>Status</div>
+      <div class="nav-item" data-p="internet"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Internet Settings</div>
+      <div class="nav-item" data-p="wireless"><svg viewBox="0 0 24 24"><path d="M2 8.5c6-5 14-5 20 0M5 12c4-3.3 10-3.3 14 0M8 15.5c2.4-2 5.6-2 8 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>Wireless Settings</div>
+      <div class="nav-item" data-p="bandwidth"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-3"/></svg>Bandwidth Control</div>
+      <div class="nav-item" data-p="parental"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.3"/><path d="M15 20c0-2.5 1.3-4.6 3.3-5.5"/></svg>Parental Controls</div>
+      <div class="nav-item" data-p="advanced"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Advanced</div>
+      <div class="nav-item" data-p="admin"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Administration</div>
+    </nav>
+
+    <main class="content">
+
+      <!-- STATUS -->
+      <section class="panel active" data-p="status">
+        <div class="sec-title">Internet Connection Status</div>
+        <div class="card">
+          <div class="conn">
+            <div class="node"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><div>Internet</div></div>
+            <div class="link"></div>
+            <div class="node"><svg viewBox="0 0 24 24"><rect x="3" y="12" width="18" height="7" rx="1.5"/><path d="M7 12V8M12 12V6M17 12V9"/></svg><div>My Router</div></div>
+            <div class="link"></div>
+            <div class="node"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="9" rx="1"/><rect x="16" y="8" width="5" height="11" rx="1"/><path d="M6 17h6"/></svg><div>Devices</div></div>
+          </div>
+          <div class="conn-ok">Connected. You can access the internet.</div>
+        </div>
+
+        <div class="sec-title">Online Devices and Real-Time Speed</div>
+        <div class="card">
+          <div class="speeds">
+            <div><div class="big n1">10</div><div class="cap">Online Devices</div></div>
+            <div><div class="big n2">1.9<span class="u"> MB/s</span></div><div class="cap">Download Speed</div></div>
+            <div><div class="big n3">47.0<span class="u"> KB/s</span></div><div class="cap">Upload Speed</div></div>
+          </div>
+        </div>
+
+        <div class="sec-title">System Information</div>
+        <div class="card">
+          <div class="info-row"><span class="k">Connection Type</span><span class="v">PPPoE</span></div>
+          <div class="info-row"><span class="k">Connection Duration</span><span class="v">1d 11h 40m 23s</span></div>
+          <div class="info-row"><span class="k">WAN MAC Address</span><span class="v">B4:0F:3B:4A:DA:50</span></div>
+          <div class="info-row"><span class="k">LAN IP Address</span><span class="v">192.168.0.1</span></div>
+          <div class="info-row"><span class="k">Firmware Version</span><span class="v">V12.02.01.73_multi</span></div>
+          <div class="info-row"><span class="k">WAN IP Address</span><span class="v">10.185.250.167</span></div>
+          <div class="info-row"><span class="k">Subnet Mask</span><span class="v">255.255.255.254</span></div>
+          <div class="info-row"><span class="k">Default Gateway</span><span class="v">10.185.240.1</span></div>
+          <div class="info-row"><span class="k">Preferred DNS Server</span><span class="v">10.81.191.14</span></div>
+          <div class="info-row"><span class="k">Alternate DNS Server</span><span class="v">-</span></div>
+        </div>
+      </section>
+
+      <!-- INTERNET SETTINGS -->
+      <section class="panel" data-p="internet">
+        <div class="sec-title">Operating Mode</div>
+        <div class="card">
+          <div class="radios">
+            <label class="rad"><input type="radio" name="opmode" checked>Router</label>
+            <label class="rad"><input type="radio" name="opmode">WISP</label>
+            <label class="rad"><input type="radio" name="opmode">Universal Repeater</label>
+            <label class="rad"><input type="radio" name="opmode">AP</label>
+          </div>
+          <div class="hint">In this mode, the router connects to an ISP in a wired manner and meanwhile provides WiFi signals, enabling clients to wirelessly access the internet.</div>
+        </div>
+
+        <div class="sec-title">Internet Connection</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Connection Type</div><div class="val">
+            <div class="radios">
+              <label class="rad"><input type="radio" name="ctype" checked>PPPoE</label>
+              <label class="rad"><input type="radio" name="ctype">PPPoE Russia</label>
+              <label class="rad"><input type="radio" name="ctype">DHCP</label>
+              <label class="rad"><input type="radio" name="ctype">Static IP Address</label>
+              <label class="rad"><input type="radio" name="ctype">PPTP Russia</label>
+              <label class="rad"><input type="radio" name="ctype">L2TP Russia</label>
+            </div>
+            <div class="hint">This type is applicable if you have a user name and password for setting up a broadband dial-up connection.</div>
+          </div></div>
+          <div class="row"><div class="lbl">User Name</div><div class="val"><input class="ctrl" value="AyyazNKR"></div></div>
+          <div class="row"><div class="lbl">Password from ISP</div><div class="val"><span class="pwd-wrap"><input id="ispPwd" class="ctrl" type="password" value="1234"><button type="button" class="eye" onclick="eye('ispPwd',this)">&#128584;</button></span></div></div>
+          <div class="row"><div class="lbl">Connection Status</div><div class="val" style="color:#6fb23a;padding-top:6px">Connected. You can access the internet.</div></div>
+        </div>
+      </section>
+
+      <!-- WIRELESS -->
+      <section class="panel" data-p="wireless">
+        <div class="card">
+          <div class="row" style="align-items:center"><div class="lbl">WiFi On/Off</div><div class="val"><label class="sw"><input type="checkbox" checked><span class="slider"></span></label></div></div>
+        </div>
+
+        <div class="sec-title">WiFi Name and Password</div>
+        <div class="card">
+          <div class="row"><div class="lbl">WiFi Name</div><div class="val" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><input class="ctrl" value="Bhatti Shop"><label class="chk-row"><input type="checkbox" class="chk">Hide WiFi</label></div></div>
+          <div class="row"><div class="lbl">Security Mode</div><div class="val"><select class="ctrl"><option>WPA2-PSK</option><option>WPA-PSK</option><option>WPA/WPA2-PSK</option><option>None</option></select></div></div>
+          <div class="row"><div class="lbl">WiFi Password</div><div class="val"><span class="pwd-wrap"><input id="wifiPwd" class="ctrl" type="password" value="12345678"><button type="button" class="eye" onclick="eye('wifiPwd',this)">&#128584;</button></span></div></div>
+        </div>
+
+        <div class="sec-title">Multi SSID and Password</div>
+        <div class="card"><div class="row"><div class="lbl">Multi SSID</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="multi">Enable</label><label class="rad"><input type="radio" name="multi" checked>Disable</label></div></div></div></div>
+
+        <div class="sec-title">WiFi Schedule</div>
+        <div class="card"><div class="row"><div class="lbl">WiFi Schedule</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="wsch">Enable</label><label class="rad"><input type="radio" name="wsch" checked>Disable</label></div></div></div></div>
+
+        <div class="sec-title">WPS</div>
+        <div class="card"><div class="row"><div class="lbl">WPS</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="wps">Enable</label><label class="rad"><input type="radio" name="wps" checked>Disable</label></div></div></div></div>
+
+        <div class="sec-title">Wireless Parameters</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Network Mode</div><div class="val"><select class="ctrl"><option>11b/g/n</option><option>11b/g</option><option>11n only</option></select></div></div>
+          <div class="row"><div class="lbl">Wireless Channel</div><div class="val" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:130px"><option>Auto</option><option>1</option><option>6</option><option>11</option></select><span class="hint" style="margin:0">Current channel:1</span></div></div>
+          <div class="row"><div class="lbl">Wireless Bandwidth</div><div class="val" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:130px"><option>20MHz</option><option>40MHz</option><option>20/40MHz</option></select><span class="hint" style="margin:0">Current bandwidth:20MHz</span></div></div>
+        </div>
+      </section>
+
+      <!-- BANDWIDTH -->
+      <section class="panel" data-p="bandwidth">
+        <div class="sec-title">Online Devices(10)</div>
+        <div class="card" id="bwlist"></div>
+        <div class="sec-title">Blacklisted Devices</div>
+        <div class="card">
+          <div class="ghead" style="grid-template-columns:1fr 1fr 80px">Device Name<span>MAC Address</span><span>Unlimit</span></div>
+          <div class="hint" style="padding:10px 2px">No device</div>
+        </div>
+      </section>
+
+      <!-- PARENTAL -->
+      <section class="panel" data-p="parental">
+        <div class="sec-title">Online Devices</div>
+        <div class="card scrollx">
+          <table class="ptbl"><thead><tr><th>Device Name</th><th>IP Address</th><th>Online Duration</th><th>Manage</th></tr></thead>
+          <tbody id="pclist"></tbody></table>
+        </div>
+
+        <div class="sec-title">Access Restrictions</div>
+        <div class="card">
+          <div class="hint" style="padding:2px 2px 10px">Settings below will be applied to all managed devices</div>
+          <div class="row"><div class="lbl">Allow access during</div><div class="val"><div class="timebox">
+            <select><option>19</option></select>:<select><option>00</option></select> ~
+            <select><option>21</option></select>:<select><option>00</option></select>
+          </div></div></div>
+          <div class="row"><div class="lbl">Repeat</div><div class="val"><div class="daygrid">
+            <label><input type="checkbox" class="chk" checked>Everyday</label>
+            <label><input type="checkbox" class="chk" checked>Mon.</label>
+            <label><input type="checkbox" class="chk" checked>Tue.</label>
+            <label><input type="checkbox" class="chk" checked>Wed.</label>
+            <label><input type="checkbox" class="chk" checked>Thu.</label>
+            <label><input type="checkbox" class="chk" checked>Fri.</label>
+            <label><input type="checkbox" class="chk" checked>Sat.</label>
+            <label><input type="checkbox" class="chk" checked>Sun.</label>
+          </div></div></div>
+          <div class="row"><div class="lbl">Website Restrictions</div><div class="val"><select class="ctrl"><option>Disable</option><option>Enable</option></select></div></div>
+        </div>
+      </section>
+
+      <!-- ADVANCED -->
+      <section class="panel" data-p="advanced">
+        <div class="sec-title">MAC Address Filter</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Filter Mode</div><div class="val">
+            <label class="rad" style="display:flex;margin-bottom:8px"><input type="radio" name="mac" checked>Blacklist <small>&nbsp;(Disallow only listed MAC addresses.)</small></label>
+            <label class="rad" style="display:flex"><input type="radio" name="mac">Whitelist <small>&nbsp;(Allow only listed MAC addresses.)</small></label>
+          </div></div>
+          <div class="ghead">Blacklisted MAC Address<span>Remark (Optional)</span><span>Operation</span></div>
+          <div class="col3">
+            <input class="ctrl" id="macIn" style="width:100%" placeholder="e.g. 3C:1B:F8:3C:C8:09">
+            <input class="ctrl" id="macRmk" style="width:100%" placeholder="Remark">
+            <button class="plus" onclick="addMac()">+</button>
+          </div>
+          <div class="maccount">Added: <b id="macCount">0</b> / 100</div>
+          <div id="macList"></div>
+        </div>
+
+        <div class="sec-title">IPTV</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Multicast</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="mc">Enable</label><label class="rad"><input type="radio" name="mc" checked>Disable</label></div></div></div>
+          <div class="row"><div class="lbl">IPTV</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="iptv">Enable</label><label class="rad"><input type="radio" name="iptv" checked>Disable</label></div></div></div>
+        </div>
+
+        <div class="sec-title">IP-MAC Binding</div>
+        <div class="card">
+          <div class="ghead">IP Address<span>MAC Address</span><span>Operation</span></div>
+          <div class="col3"><input class="ctrl" style="width:100%"><input class="ctrl" style="width:100%"><button class="plus">+</button></div>
+        </div>
+
+        <div class="sec-title">DDNS</div>
+        <div class="card"><div class="row"><div class="lbl">DDNS</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="ddns">Enable</label><label class="rad"><input type="radio" name="ddns" checked>Disable</label></div></div></div></div>
+        <div class="sec-title">DMZ Host</div>
+        <div class="card"><div class="row"><div class="lbl">DMZ Host</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="dmz">Enable</label><label class="rad"><input type="radio" name="dmz" checked>Disable</label></div></div></div></div>
+        <div class="sec-title">PING WAN</div>
+        <div class="card"><div class="row"><div class="lbl">PING WAN</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="ping">Enable</label><label class="rad"><input type="radio" name="ping" checked>Disable</label></div></div></div></div>
+        <div class="sec-title">UPNP</div>
+        <div class="card"><div class="row"><div class="lbl">UPNP</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="upnp">Enable</label><label class="rad"><input type="radio" name="upnp" checked>Disable</label></div></div></div></div>
+        <div class="sec-title">AP Isolation</div>
+        <div class="card"><div class="row"><div class="lbl">AP Isolation</div><div class="val"><div class="radios"><label class="rad"><input type="radio" name="apiso">Enable</label><label class="rad"><input type="radio" name="apiso" checked>Disable</label></div></div></div></div>
+      </section>
+
+      <!-- ADMINISTRATION -->
+      <section class="panel" data-p="admin">
+        <div class="sec-title">Login Password</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Old Password</div><div class="val"><input class="ctrl" type="password" placeholder="Must be numbers and letters"></div></div>
+          <div class="row"><div class="lbl">New Password</div><div class="val"><input class="ctrl" type="password" placeholder="Must be numbers and letters"></div></div>
+          <div class="row"><div class="lbl">Confirm Password</div><div class="val"><input class="ctrl" type="password" placeholder="Repeat New Password"></div></div>
+        </div>
+
+        <div class="sec-title">WAN Parameters</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Server Name</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Default</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
+          <div class="row"><div class="lbl">Service Name</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Default</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
+          <div class="row"><div class="lbl">MTU</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>1480</option><option>1492</option><option>1500</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
+          <div class="row"><div class="lbl">Clone MAC Address</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Restore Default</option><option>Clone Local</option></select><span class="hint" style="margin:0">Default MAC Address: B4:0F:3B:4A:DA:50</span></div></div>
+          <div class="row"><div class="lbl">WAN Speed</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Auto-negotiation</option></select><span class="hint" style="margin:0">Current speed:100 Mbps full duplex</span></div></div>
+        </div>
+
+        <div class="sec-title">LAN Parameters</div>
+        <div class="card">
+          <div class="row"><div class="lbl">LAN IP Address</div><div class="val"><input class="ctrl" value="192.168.0.1"></div></div>
+          <div class="row"><div class="lbl">Subnet Mask</div><div class="val"><input class="ctrl" value="255.255.255.0"></div></div>
+          <div class="row"><div class="lbl">DHCP Server</div><div class="val" style="padding-top:6px"><label class="chk-row"><input type="checkbox" class="chk" checked>Enable</label> <span class="hint" style="display:block;margin-top:6px">If this function is disabled, the router stops assigning IP addresses to clients.</span></div></div>
+          <div class="row"><div class="lbl">Start IP Address</div><div class="val">192.168.0.<input class="ctrl" style="width:70px" value="100"></div></div>
+          <div class="row"><div class="lbl">End IP Address</div><div class="val">192.168.0.<input class="ctrl" style="width:70px" value="200"></div></div>
+          <div class="row"><div class="lbl">Preferred DNS Server</div><div class="val"><input class="ctrl" value="192.168.0.1"></div></div>
+          <div class="row"><div class="lbl">Alternate DNS Server</div><div class="val"><input class="ctrl"></div></div>
+        </div>
+
+        <div class="sec-title">Remote Web-based Management</div>
+        <div class="card"><div class="row"><div class="lbl">Remote Web-based Management</div><div class="val" style="padding-top:6px"><label class="chk-row"><input type="checkbox" class="chk">Enable</label><span class="hint" style="display:block;margin-top:6px">If this function is enabled, you can manage the router through the internet.</span></div></div></div>
+
+        <div class="sec-title">Date &amp; Time</div>
+        <div class="card">
+          <div class="row"><div class="lbl">Time Zone</div><div class="val"><select class="ctrl" style="width:280px;max-width:100%"><option>(GMT+05:00)Islamabad, Karachi, Tashkent</option></select></div></div>
+          <div class="row"><div class="lbl">Current Time</div><div class="val" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap"><span style="padding-top:6px;color:#555" id="curTime">2026-10-09 21:33:00</span><span class="hint" style="margin:0">The current date and time have been synchronized with those of the internet.</span></div></div>
+        </div>
+
+        <div class="sec-title">Device Management</div>
+        <div class="card">
+          <div class="mgmt-row"><span class="k">Reboot Router</span><button class="gbtn">Reboot</button></div>
+          <div class="mgmt-row"><span class="k">Restore Factory Settings</span><button class="gbtn">Reset</button></div>
+          <div class="mgmt-row"><span class="k">Backup/Restore Configuration</span><button class="gbtn">Backup</button><button class="gbtn">Restore</button></div>
+          <div class="mgmt-row"><span class="k">Export System Log</span><button class="gbtn">Export</button></div>
+          <div class="mgmt-row"><span class="k">Upgrade Firmware</span><div><button class="gbtn">Local Upgrade</button><div class="hint" style="margin-top:6px">Current Firmware Version:V12.02.01.73_multi</div></div></div>
+          <div class="mgmt-row"><span class="k">Automatic Maintenance</span><div><label class="chk-row"><input type="checkbox" class="chk" checked>Enable</label><div class="hint" style="margin-top:6px">If this function is enabled, the router reboots during 02:00 a.m. to 05:30 a.m. every day when the traffic is less than 3 KB/s.</div></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="actions"><button class="btn-ok" onclick="save()">OK</button><button class="btn-cancel">Cancel</button></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var EYE_OPEN='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9a9a9a" stroke-width="1.6"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+var EYE_OFF='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9a9a9a" stroke-width="1.6"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a18 18 0 0 1-3 3.9M6.1 6.1A18 18 0 0 0 1 12s4 7 11 7a10.9 10.9 0 0 0 4.4-.9"/></svg>';
+function eye(id,btn){var i=document.getElementById(id);var show=i.type==="password";i.type=show?"text":"password";btn.innerHTML=show?EYE_OFF:EYE_OPEN;}
+function doLogin(){
+  var p=document.getElementById("loginPwd").value;
+  if(!p){toast("پاس ورڈ لکھیں");return;}
+  document.getElementById("login").hidden=true;document.getElementById("app").hidden=false;window.scrollTo(0,0);}
+/* set all eye buttons to the open-eye icon */
+Array.prototype.forEach.call(document.querySelectorAll(".eye"),function(b){b.innerHTML=EYE_OPEN;});
+function logout(){document.getElementById("app").hidden=true;document.getElementById("login").hidden=false;document.getElementById("loginPwd").value="";window.scrollTo(0,0);}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},1700);}
+function save(){toast("Settings saved successfully");}
+
+/* mobile menu */
+function toggleMenu(force){
+  var nav=document.getElementById("nav"),bd=document.getElementById("backdrop");
+  var open=(force===undefined)?!nav.classList.contains("open"):force;
+  nav.classList.toggle("open",open);bd.classList.toggle("show",open);
+}
+
+/* nav switching */
+document.getElementById("nav").addEventListener("click",function(e){
+  var it=e.target.closest(".nav-item");if(!it)return;
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  it.classList.add("active");
+  var p=it.dataset.p;
+  document.querySelectorAll(".panel").forEach(s=>s.classList.toggle("active",s.dataset.p===p));
+  toggleMenu(false);
+  window.scrollTo(0,0);
+});
+
+/* ---- saved names + rename ---- */
+var names={};
+try{names=JSON.parse(localStorage.getItem("tenda_names")||"{}");}catch(e){names={};}
+function dispName(key,def){return (names[key]!=null)?names[key]:def;}
+function rename(key,pen){
+  var cell=pen.parentNode,nm=cell.querySelector(".dnm");if(!nm)return;
+  var cur=nm.textContent;
+  var inp=document.createElement("input");
+  inp.className="ctrl";inp.style.height="28px";inp.style.width="150px";inp.style.maxWidth="60vw";inp.value=cur;
+  nm.replaceWith(inp);inp.focus();inp.select();
+  function done(){
+    var v=inp.value.trim()||cur;names[key]=v;
+    try{localStorage.setItem("tenda_names",JSON.stringify(names));}catch(e){}
+    var s=document.createElement("span");s.className="dnm";s.textContent=v;inp.replaceWith(s);
+  }
+  inp.addEventListener("blur",done);
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();inp.blur();}});
+}
+
+/* bandwidth devices */
+var bw=[
+ ["Shafiq-ss","192.168.0.105","16:50:4b:ab:c4:1e","128.00KB/s",true],
+ ["DVR","192.168.0.100","3c:1b:f8:3c:c8:09","No limit",true],
+ ["Shafiq","192.168.0.104","22:8b:db:18:f8:6a","128.00KB/s",true],
+ ["Tiger 2","192.168.0.111","3e:6c:85:92:83:db","128.00KB/s",true],
+ ["Hakeem-Sajjad-Ahmad","192.168.0.103","d2:55:f9:db:de:1d","No limit",null],
+ ["Abu","192.168.0.109","5a:63:40:a0:ba:d6","256.00KB/s",true],
+ ["Irshad","192.168.0.117","00:e0:30:4f:c3:9a","128.00KB/s",true],
+ ["Fiza Ayaz","192.168.0.113","ca:c3:17:ec:57:74","128.00KB/s",true],
+ ["Tiger","192.168.0.121","26:4d:58:b2:c8:46","128.00KB/s",true],
+ ["Ayaz","192.168.0.115","be:85:64:e9:b9:28","No limit",true]
+];
+var opts=["No limit","128.00KB/s","256.00KB/s","512.00KB/s","1.00MB/s"];
+function renderBw(){
+  document.getElementById("bwlist").innerHTML=bw.map(function(d,idx){
+    var sel='<select class="ctrl">'+opts.map(o=>'<option'+(o===d[3]?' selected':'')+'>'+o+'</option>').join('')+'</select>';
+    var access=d[4]===null?'<span class="local">Local</span>':'<label class="sw"><input type="checkbox" checked><span class="slider"></span></label>';
+    return '<div class="dev"><div class="ava">?</div><div class="meta"><div class="nm"><span class="dnm">'+dispName("bw"+idx,d[0])+'</span> <span class="pen" onclick="rename(\'bw'+idx+'\',this)">&#9998;</span></div><div class="ip">'+d[1]+'</div><div class="mac">'+d[2]+'</div></div><div class="mid">'+sel+'</div><div>'+access+'</div></div>';
+  }).join('');
+}
+renderBw();
+
+/* parental devices (order as per device) */
+var pc=[
+ ["Shafiq-ss","192.168.0.105","1h 18m 52s"],["DVR","192.168.0.100","1d 11h 40m"],
+ ["Shafiq","192.168.0.104","1h 42m 8s"],["Tiger 2","192.168.0.111","30m 32s"],
+ ["Hakeem-Sajjad-Ahmad","192.168.0.103","54m 58s"],["Abu","192.168.0.109","15m 46s"],
+ ["Irshad","192.168.0.117","5m 46s"],["Fiza Ayaz","192.168.0.113","2h 30m 38s"],
+ ["Tiger","192.168.0.121","1h 28m 29s"],["Ayaz","192.168.0.115","56m 53s"]
+];
+function renderPc(){
+  document.getElementById("pclist").innerHTML=pc.map(function(d,idx){
+    return '<tr><td><span class="dnm">'+dispName("pc"+idx,d[0])+'</span> <span class="pen" onclick="rename(\'pc'+idx+'\',this)">&#9998;</span></td><td>'+d[1]+'</td><td>'+d[2]+'</td><td><label class="sw"><input type="checkbox"><span class="slider"></span></label></td></tr>';
+  }).join('');
+}
+renderPc();
+
+/* MAC Address Filter — up to 100 entries */
+var MAC_MAX=100;
+var macList=[];
+try{macList=JSON.parse(localStorage.getItem("tenda_mac")||"[]");}catch(e){macList=[];}
+function saveMac(){try{localStorage.setItem("tenda_mac",JSON.stringify(macList));}catch(e){}}
+function renderMac(){
+  document.getElementById("macCount").textContent=macList.length;
+  document.getElementById("macList").innerHTML=macList.map(function(m,i){
+    return '<div class="macrow"><span class="mono">'+m.a+'</span><span class="rmk">'+(m.r||'')+'</span>'+
+      '<button class="rm" onclick="removeMac('+i+')">&times;</button></div>';
+  }).join('');
+}
+function addMac(){
+  var a=document.getElementById("macIn").value.trim();
+  var r=document.getElementById("macRmk").value.trim();
+  if(!a){toast("MAC address لکھیں");return;}
+  if(macList.length>=MAC_MAX){toast("زیادہ سے زیادہ "+MAC_MAX+" MAC ایڈریس");return;}
+  macList.push({a:a,r:r});saveMac();
+  document.getElementById("macIn").value="";document.getElementById("macRmk").value="";
+  renderMac();
+}
+function removeMac(i){macList.splice(i,1);saveMac();renderMac();}
+renderMac();
+
+/* ---- remember every toggle, limit & field across reloads ---- */
+(function(){
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem("tenda_state")||"{}");}catch(e){saved={};}
+  var ctrls=document.querySelectorAll("#app input, #app select");
+  Array.prototype.forEach.call(ctrls,function(c,i){
+    var key="c"+i,isCheck=(c.type==="checkbox"||c.type==="radio");
+    if(saved[key]!=null){ if(isCheck){c.checked=saved[key];} else {c.value=saved[key];} }
+    var ev=(c.tagName==="SELECT"||isCheck)?"change":"input";
+    c.addEventListener(ev,function(){
+      var s={};try{s=JSON.parse(localStorage.getItem("tenda_state")||"{}");}catch(e){}
+      s[key]=isCheck?c.checked:c.value;
+      try{localStorage.setItem("tenda_state",JSON.stringify(s));}catch(e){}
+    });
+  });
+})();
+
+/* live clock */
+setInterval(function(){
+  var el=document.getElementById("curTime");if(!el)return;
+  var n=new Date(),p=x=>String(x).padStart(2,"0");
+  el.textContent=n.getFullYear()+"-"+p(n.getMonth()+1)+"-"+p(n.getDate())+" "+p(n.getHours())+":"+p(n.getMinutes())+":"+p(n.getSeconds());
+},1000);
+</script>
