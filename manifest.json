@@ -1,0 +1,19 @@
+{
+  "name": "Tenda Router Panel",
+  "short_name": "Router Panel",
+  "description": "WiFi router control panel — demo web interface.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "any",
+  "background_color": "#ececec",
+  "theme_color": "#f07c1a",
+  "lang": "en",
+  "categories": ["utilities"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

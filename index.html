@@ -1,3 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f07c1a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Router Panel">
 <title>Tenda Router Panel</title>
 <style>
 /* Layout: top orange bar (with mobile hamburger), left sidebar / mobile slide-out menu, scrolling card panels, sticky OK/Cancel footer. Single light theme to match the real device UI. */
@@ -192,6 +205,8 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
     </div>
     <button class="btn-login" type="button" onclick="doLogin()">Login</button>
     <span class="forgot">Forgot your password? &#9656;</span>
+    <button type="button" id="bInstall" class="btn-login" style="background:#f07c1a;margin-top:14px" hidden>&#128241; Install App</button>
+    <div id="iosTip" style="margin-top:12px;font-size:13px;color:#777;line-height:1.7;display:none">On iPhone/iPad: in Safari tap <b>Share</b> (&#11014;&#65039;), then <b>Add to Home Screen</b>.</div>
   </form>
 </div>
 
@@ -200,7 +215,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
   <div class="topbar">
     <div class="brand">Tenda</div>
     <div class="right">
-      <span onclick="logout()">Logout</span>
+      <span id="bInstall2" hidden>Install</span><span onclick="logout()">Logout</span>
       <span>English &#9662;</span>
       <button class="hamb" onclick="toggleMenu()" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     </div>
@@ -248,7 +263,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
         <div class="card">
           <div class="info-row"><span class="k">Connection Type</span><span class="v">PPPoE</span></div>
           <div class="info-row"><span class="k">Connection Duration</span><span class="v">1d 11h 40m 23s</span></div>
-          <div class="info-row"><span class="k">WAN MAC Address</span><span class="v">B4:0F:3B:4A:DA:50</span></div>
+          <div class="info-row"><span class="k">WAN MAC Address</span><span class="v">··:··:··:··:··:··</span></div>
           <div class="info-row"><span class="k">LAN IP Address</span><span class="v">192.168.0.1</span></div>
           <div class="info-row"><span class="k">Firmware Version</span><span class="v">V12.02.01.73_multi</span></div>
           <div class="info-row"><span class="k">WAN IP Address</span><span class="v">10.185.250.167</span></div>
@@ -285,8 +300,8 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
             </div>
             <div class="hint">This type is applicable if you have a user name and password for setting up a broadband dial-up connection.</div>
           </div></div>
-          <div class="row"><div class="lbl">User Name</div><div class="val"><input class="ctrl" value="AyyazNKR"></div></div>
-          <div class="row"><div class="lbl">Password from ISP</div><div class="val"><span class="pwd-wrap"><input id="ispPwd" class="ctrl" type="password" value="1234"><button type="button" class="eye" onclick="eye('ispPwd',this)">&#128584;</button></span></div></div>
+          <div class="row"><div class="lbl">User Name</div><div class="val"><input class="ctrl" value=""></div></div>
+          <div class="row"><div class="lbl">Password from ISP</div><div class="val"><span class="pwd-wrap"><input id="ispPwd" class="ctrl" type="password" value=""><button type="button" class="eye" onclick="eye('ispPwd',this)">&#128584;</button></span></div></div>
           <div class="row"><div class="lbl">Connection Status</div><div class="val" style="color:#6fb23a;padding-top:6px">Connected. You can access the internet.</div></div>
         </div>
       </section>
@@ -301,7 +316,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
         <div class="card">
           <div class="row"><div class="lbl">WiFi Name</div><div class="val" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><input class="ctrl" value="Bhatti Shop"><label class="chk-row"><input type="checkbox" class="chk">Hide WiFi</label></div></div>
           <div class="row"><div class="lbl">Security Mode</div><div class="val"><select class="ctrl"><option>WPA2-PSK</option><option>WPA-PSK</option><option>WPA/WPA2-PSK</option><option>None</option></select></div></div>
-          <div class="row"><div class="lbl">WiFi Password</div><div class="val"><span class="pwd-wrap"><input id="wifiPwd" class="ctrl" type="password" value="12345678"><button type="button" class="eye" onclick="eye('wifiPwd',this)">&#128584;</button></span></div></div>
+          <div class="row"><div class="lbl">WiFi Password</div><div class="val"><span class="pwd-wrap"><input id="wifiPwd" class="ctrl" type="password" value=""><button type="button" class="eye" onclick="eye('wifiPwd',this)">&#128584;</button></span></div></div>
         </div>
 
         <div class="sec-title">Multi SSID and Password</div>
@@ -371,7 +386,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
           </div></div>
           <div class="ghead">Blacklisted MAC Address<span>Remark (Optional)</span><span>Operation</span></div>
           <div class="col3">
-            <input class="ctrl" id="macIn" style="width:100%" placeholder="e.g. 3C:1B:F8:3C:C8:09">
+            <input class="ctrl" id="macIn" style="width:100%" placeholder="e.g. AA:BB:CC:DD:EE:FF">
             <input class="ctrl" id="macRmk" style="width:100%" placeholder="Remark">
             <button class="plus" onclick="addMac()">+</button>
           </div>
@@ -417,7 +432,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
           <div class="row"><div class="lbl">Server Name</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Default</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
           <div class="row"><div class="lbl">Service Name</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Default</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
           <div class="row"><div class="lbl">MTU</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>1480</option><option>1492</option><option>1500</option></select><span class="hint" style="margin:0">Do not change if unnecessary.</span></div></div>
-          <div class="row"><div class="lbl">Clone MAC Address</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Restore Default</option><option>Clone Local</option></select><span class="hint" style="margin:0">Default MAC Address: B4:0F:3B:4A:DA:50</span></div></div>
+          <div class="row"><div class="lbl">Clone MAC Address</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Restore Default</option><option>Clone Local</option></select><span class="hint" style="margin:0">Default MAC Address: ··:··:··:··:··:··</span></div></div>
           <div class="row"><div class="lbl">WAN Speed</div><div class="val" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><select class="ctrl" style="width:150px"><option>Auto-negotiation</option></select><span class="hint" style="margin:0">Current speed:100 Mbps full duplex</span></div></div>
         </div>
 
@@ -513,16 +528,16 @@ function rename(key,pen){
 
 /* bandwidth devices */
 var bw=[
- ["Shafiq-ss","192.168.0.105","16:50:4b:ab:c4:1e","128.00KB/s",true],
- ["DVR","192.168.0.100","3c:1b:f8:3c:c8:09","No limit",true],
- ["Shafiq","192.168.0.104","22:8b:db:18:f8:6a","128.00KB/s",true],
- ["Tiger 2","192.168.0.111","3e:6c:85:92:83:db","128.00KB/s",true],
- ["Hakeem-Sajjad-Ahmad","192.168.0.103","d2:55:f9:db:de:1d","No limit",null],
- ["Abu","192.168.0.109","5a:63:40:a0:ba:d6","256.00KB/s",true],
- ["Irshad","192.168.0.117","00:e0:30:4f:c3:9a","128.00KB/s",true],
- ["Fiza Ayaz","192.168.0.113","ca:c3:17:ec:57:74","128.00KB/s",true],
- ["Tiger","192.168.0.121","26:4d:58:b2:c8:46","128.00KB/s",true],
- ["Ayaz","192.168.0.115","be:85:64:e9:b9:28","No limit",true]
+ ["Shafiq-ss","192.168.0.105","··:··:··:··:··:··","128.00KB/s",true],
+ ["DVR","192.168.0.100","··:··:··:··:··:··","No limit",true],
+ ["Shafiq","192.168.0.104","··:··:··:··:··:··","128.00KB/s",true],
+ ["Tiger 2","192.168.0.111","··:··:··:··:··:··","128.00KB/s",true],
+ ["Hakeem-Sajjad-Ahmad","192.168.0.103","··:··:··:··:··:··","No limit",null],
+ ["Abu","192.168.0.109","··:··:··:··:··:··","256.00KB/s",true],
+ ["Irshad","192.168.0.117","··:··:··:··:··:··","128.00KB/s",true],
+ ["Fiza Ayaz","192.168.0.113","··:··:··:··:··:··","128.00KB/s",true],
+ ["Tiger","192.168.0.121","··:··:··:··:··:··","128.00KB/s",true],
+ ["Ayaz","192.168.0.115","··:··:··:··:··:··","No limit",true]
 ];
 var opts=["No limit","128.00KB/s","256.00KB/s","512.00KB/s","1.00MB/s"];
 function renderBw(){
@@ -596,4 +611,27 @@ setInterval(function(){
   var n=new Date(),p=x=>String(x).padStart(2,"0");
   el.textContent=n.getFullYear()+"-"+p(n.getMonth()+1)+"-"+p(n.getDate())+" "+p(n.getHours())+":"+p(n.getMinutes())+":"+p(n.getSeconds());
 },1000);
+
 </script>
+<script>
+(function(){
+  var btn=document.getElementById('bInstall'), btn2=document.getElementById('bInstall2'), tip=document.getElementById('iosTip');
+  var standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var deferred=null;
+  function show(on){ if(btn)btn.hidden=!on; if(btn2)btn2.hidden=!on; }
+  if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+    addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(){});});
+  }
+  if(standalone)return;
+  addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;show(true);});
+  addEventListener('appinstalled',function(){deferred=null;show(false);if(tip)tip.style.display='none';});
+  if(ios)show(true);
+  function install(){
+    if(deferred){deferred.prompt();deferred.userChoice.then(function(r){deferred=null;if(r&&r.outcome==='accepted')show(false);});return;}
+    if(ios&&tip){tip.style.display='block';tip.scrollIntoView({block:'center',behavior:'smooth'});}
+  }
+  if(btn)btn.onclick=install; if(btn2)btn2.onclick=install;
+})();
+</script>
+</html>
