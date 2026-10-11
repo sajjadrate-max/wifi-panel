@@ -253,16 +253,16 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
         <div class="sec-title">Online Devices and Real-Time Speed</div>
         <div class="card">
           <div class="speeds">
-            <div><div class="big n1">10</div><div class="cap">Online Devices</div></div>
-            <div><div class="big n2">1.9<span class="u"> MB/s</span></div><div class="cap">Download Speed</div></div>
-            <div><div class="big n3">47.0<span class="u"> KB/s</span></div><div class="cap">Upload Speed</div></div>
+            <div><div class="big n1" id="devCount">10</div><div class="cap">Online Devices</div></div>
+            <div><div class="big n2"><span id="dlNum">1.9</span><span class="u" id="dlUnit"> MB/s</span></div><div class="cap">Download Speed</div></div>
+            <div><div class="big n3"><span id="ulNum">47.0</span><span class="u" id="ulUnit"> KB/s</span></div><div class="cap">Upload Speed</div></div>
           </div>
         </div>
 
         <div class="sec-title">System Information</div>
         <div class="card">
           <div class="info-row"><span class="k">Connection Type</span><span class="v">PPPoE</span></div>
-          <div class="info-row"><span class="k">Connection Duration</span><span class="v">1d 11h 40m 23s</span></div>
+          <div class="info-row"><span class="k">Connection Duration</span><span class="v" id="connDur">1d 11h 40m 23s</span></div>
           <div class="info-row"><span class="k">WAN MAC Address</span><span class="v">··:··:··:··:··:··</span></div>
           <div class="info-row"><span class="k">LAN IP Address</span><span class="v">192.168.0.1</span></div>
           <div class="info-row"><span class="k">Firmware Version</span><span class="v">V12.02.01.73_multi</span></div>
@@ -632,6 +632,29 @@ setInterval(function(){
     if(ios&&tip){tip.style.display='block';tip.scrollIntoView({block:'center',behavior:'smooth'});}
   }
   if(btn)btn.onclick=install; if(btn2)btn2.onclick=install;
+})();
+</script>
+<script>
+/* live speed + uptime simulation (demo values, not a real router) */
+(function(){
+  var dl=document.getElementById('dlNum'),dlU=document.getElementById('dlUnit');
+  var ul=document.getElementById('ulNum'),ulU=document.getElementById('ulUnit');
+  var dev=document.getElementById('devCount'),dur=document.getElementById('connDur');
+  var up=1*86400+11*3600+40*60+23;           // 1d 11h 40m 23s
+  var dlK=1900, ulK=47, nDev=10;             // KB/s, KB/s, devices
+  function pad(n){return (n<10?'0':'')+n;}
+  function fmtDur(t){var d=Math.floor(t/86400);t%=86400;var h=Math.floor(t/3600);t%=3600;var m=Math.floor(t/60);return d+'d '+h+'h '+m+'m '+pad(t%60)+'s';}
+  function fmt(kbps){return kbps>=1024?{n:(kbps/1024).toFixed(1),u:' MB/s'}:{n:kbps.toFixed(1),u:' KB/s'};}
+  function tick(){
+    dlK+=(Math.random()-0.5)*700; dlK=Math.max(60,Math.min(4300,dlK));
+    ulK+=(Math.random()-0.5)*44;  ulK=Math.max(4,Math.min(280,ulK));
+    if(Math.random()<0.06){nDev+=(Math.random()<0.5?-1:1);nDev=Math.max(8,Math.min(12,nDev));if(dev)dev.textContent=nDev;}
+    var d=fmt(dlK),u=fmt(ulK);
+    if(dl){dl.textContent=d.n;} if(dlU){dlU.textContent=d.u;}
+    if(ul){ul.textContent=u.n;} if(ulU){ulU.textContent=u.u;}
+  }
+  setInterval(function(){up++;if(dur)dur.textContent=fmtDur(up);tick();},1000);
+  tick();
 })();
 </script>
 </html>
