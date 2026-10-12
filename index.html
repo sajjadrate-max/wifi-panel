@@ -353,7 +353,10 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
       <!-- BANDWIDTH -->
       <section class="panel" data-p="bandwidth">
         <div class="sec-title">Online Devices(10)</div>
-        <div class="card" id="bwlist"></div>
+        <div class="card">
+          <div class="ghead" style="grid-template-columns:1fr 118px 86px;align-items:end">Device Name<span>Download Limit</span><span>Internet Access</span></div>
+          <div id="bwlist"></div>
+        </div>
         <div class="sec-title">Blacklisted Devices</div>
         <div class="card">
           <div class="ghead" style="grid-template-columns:1fr 1fr 80px">Device Name<span>MAC Address</span><span>Unlimit</span></div>
@@ -563,6 +566,17 @@ function renderBw(){
   }).join('');
 }
 renderBw();
+/* feedback when a device's limit or internet access is changed */
+(function(){
+  var box=document.getElementById('bwlist');
+  if(!box)return;
+  box.addEventListener('change',function(e){
+    var d=e.target.closest('.dev');if(!d)return;
+    var nm=d.querySelector('.dnm')?d.querySelector('.dnm').textContent:'Device';
+    if(e.target.matches('.sw input')){toast(nm+(e.target.checked?' \u2014 internet access ON':' \u2014 internet access OFF'));}
+    else if(e.target.matches('select')){toast(nm+' \u2014 download limit: '+e.target.value);}
+  });
+})();
 
 /* parental devices (order as per device) */
 var pc=[
