@@ -360,7 +360,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
         <div class="sec-title">Blacklisted Devices</div>
         <div class="card">
           <div class="ghead" style="grid-template-columns:1fr 1fr 80px">Device Name<span>MAC Address</span><span>Unlimit</span></div>
-          <div class="maccount" style="padding-top:2px">Total: <b>10</b></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Unknown</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Fazu</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">TECNO-SPARK-Go</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Unknown</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">V2149</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Unknown</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Unknown</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Infinix-SMART-10</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Mora</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div><div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">Unknown</span><span class="mono">··:··:··:··:··:··</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px">Unlimit</button></div>
+          <div id="blDevList"></div>
         </div>
       </section>
 
@@ -398,10 +398,11 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
         <div class="sec-title">MAC Address Filter</div>
         <div class="card">
           <div class="row"><div class="lbl">Filter Mode</div><div class="val">
-            <label class="rad" style="display:flex;margin-bottom:8px"><input type="radio" name="mac" checked>Blacklist <small>&nbsp;(Disallow only listed MAC addresses.)</small></label>
-            <label class="rad" style="display:flex"><input type="radio" name="mac">Whitelist <small>&nbsp;(Allow only listed MAC addresses.)</small></label>
+            <label class="rad" style="display:flex;margin-bottom:8px"><input type="radio" name="mac" id="modeBlack" checked onclick="setMode('black')">Blacklist <small>&nbsp;(Disallow only listed MAC addresses.)</small></label>
+            <label class="rad" style="display:flex"><input type="radio" name="mac" id="modeWhite" onclick="setMode('white')">Whitelist <small>&nbsp;(Allow only listed MAC addresses.)</small></label>
           </div></div>
-          <div class="ghead">Blacklisted MAC Address<span>Remark (Optional)</span><span>Operation</span></div>
+          <div class="row"><div class="lbl">Add a device</div><div class="val"><select class="ctrl" id="macPick" style="width:100%"><option value="">— choose a connected device —</option></select></div></div>
+          <div class="ghead" id="macHead">Blacklisted MAC Address<span>Remark (Optional)</span><span>Operation</span></div>
           <div class="col3">
             <input class="ctrl" id="macIn" style="width:100%" placeholder="e.g. AA:BB:CC:DD:EE:FF">
             <input class="ctrl" id="macRmk" style="width:100%" placeholder="Remark">
@@ -546,16 +547,16 @@ function rename(key,pen){
 
 /* bandwidth devices */
 var bw=[
- ["Shafiq-ss","192.168.0.105","··:··:··:··:··:··","128.00KB/s",true],
- ["DVR","192.168.0.100","··:··:··:··:··:··","No limit",true],
- ["Shafiq","192.168.0.104","··:··:··:··:··:··","128.00KB/s",true],
- ["Tiger 2","192.168.0.111","··:··:··:··:··:··","128.00KB/s",true],
- ["Hakeem-Sajjad-Ahmad","192.168.0.103","··:··:··:··:··:··","No limit",null],
- ["Abu","192.168.0.109","··:··:··:··:··:··","256.00KB/s",true],
- ["Irshad","192.168.0.117","··:··:··:··:··:··","128.00KB/s",true],
- ["Fiza Ayaz","192.168.0.113","··:··:··:··:··:··","128.00KB/s",true],
- ["Tiger","192.168.0.121","··:··:··:··:··:··","128.00KB/s",true],
- ["Ayaz","192.168.0.115","··:··:··:··:··:··","No limit",true]
+ ["Shafiq-ss","192.168.0.105","02:A5:4D:CA:18:25","128.00KB/s",true],
+ ["DVR","192.168.0.100","02:30:BB:1D:6D:13","No limit",true],
+ ["Shafiq","192.168.0.104","02:2C:DE:D6:23:7B","128.00KB/s",true],
+ ["Tiger 2","192.168.0.111","02:2E:D9:1E:3F:72","128.00KB/s",true],
+ ["Hakeem-Sajjad-Ahmad","192.168.0.103","02:1F:CB:19:71:17","No limit",null],
+ ["Abu","192.168.0.109","02:44:94:D6:49:3C","256.00KB/s",true],
+ ["Irshad","192.168.0.117","02:9D:5C:34:60:BE","128.00KB/s",true],
+ ["Fiza Ayaz","192.168.0.113","02:31:20:1E:69:FE","128.00KB/s",true],
+ ["Tiger","192.168.0.121","02:DA:A0:EE:E8:B9","128.00KB/s",true],
+ ["Ayaz","192.168.0.115","02:99:7F:5C:7C:29","No limit",true]
 ];
 var opts=["No limit","128.00KB/s","256.00KB/s","512.00KB/s","1.00MB/s"];
 function renderBw(){
@@ -593,29 +594,59 @@ function renderPc(){
 }
 renderPc();
 
-/* MAC Address Filter — up to 100 entries */
+/* MAC Address Filter (black/white) + Blacklisted devices (demo) */
 var MAC_MAX=100;
-var macList=[];
-try{macList=JSON.parse(localStorage.getItem("tenda_mac")||"[]");}catch(e){macList=[];}
-function saveMac(){try{localStorage.setItem("tenda_mac",JSON.stringify(macList));}catch(e){}}
-function renderMac(){
-  document.getElementById("macCount").textContent=macList.length;
-  document.getElementById("macList").innerHTML=macList.map(function(m,i){
-    return '<div class="macrow"><span class="mono">'+m.a+'</span><span class="rmk">'+(m.r||'')+'</span>'+
-      '<button class="rm" onclick="removeMac('+i+')">&times;</button></div>';
+var BLACK_SEED=[{"a": "02:99:FD:AF:E5:93", "r": "Unknown"}, {"a": "02:25:3C:D6:54:AF", "r": "Fazu"}, {"a": "02:4D:FA:D7:14:27", "r": "TECNO-SPARK-Go"}, {"a": "02:A0:AE:B3:FE:E9", "r": "Unknown"}, {"a": "02:23:2F:8A:F2:21", "r": "V2149"}, {"a": "02:1F:9E:E4:91:C5", "r": "Unknown"}, {"a": "02:B1:0B:EC:B5:56", "r": "Unknown"}, {"a": "02:3B:FC:1E:6F:93", "r": "Infinix-SMART-10"}, {"a": "02:42:7E:CB:C8:FE", "r": "Mora"}, {"a": "02:29:55:E5:CD:8E", "r": "Unknown"}];
+var BLACK,WHITE,curMode="black";
+try{BLACK=JSON.parse(localStorage.getItem("tenda_black")||"null")||BLACK_SEED.slice();}catch(e){BLACK=BLACK_SEED.slice();}
+try{WHITE=JSON.parse(localStorage.getItem("tenda_white")||"[]");}catch(e){WHITE=[];}
+function saveLists(){try{localStorage.setItem("tenda_black",JSON.stringify(BLACK));localStorage.setItem("tenda_white",JSON.stringify(WHITE));}catch(e){}}
+function curList(){return curMode==="black"?BLACK:WHITE;}
+function renderBlDev(){
+  var el=document.getElementById("blDevList");if(!el)return;
+  if(!BLACK.length){el.innerHTML='<div class="hint" style="padding:10px 2px">No device</div>';return;}
+  el.innerHTML='<div class="maccount" style="padding-top:2px">Total: <b>'+BLACK.length+'</b></div>'+BLACK.map(function(m,i){
+    return '<div class="macrow" style="grid-template-columns:1fr 1fr 80px;align-items:center"><span class="rmk">'+(m.r||"Unknown")+'</span><span class="mono">'+m.a+'</span><button class="gbtn" style="min-width:0;height:30px;padding:0 12px" onclick="unblock('+i+')">Unlimit</button></div>';
   }).join('');
 }
-function addMac(){
+function renderMac(){
+  var list=curList(),head=document.getElementById("macHead");
+  if(head&&head.firstChild)head.firstChild.textContent=(curMode==="black"?"Blacklisted":"Whitelisted")+" MAC Address";
+  var c=document.getElementById("macCount");if(c)c.textContent=list.length;
+  document.getElementById("macList").innerHTML=list.map(function(m,i){
+    return '<div class="macrow"><span class="mono">'+m.a+'</span><span class="rmk">'+(m.r||"")+'</span><button class="rm" onclick="removeMac('+i+')">&times;</button></div>';
+  }).join('');
+}
+function renderAll(){renderMac();renderBlDev();}
+window.setMode=function(m){curMode=m;renderMac();};
+function validMac(x){return /^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/.test(x);}
+window.addMac=function(){
   var a=document.getElementById("macIn").value.trim();
   var r=document.getElementById("macRmk").value.trim();
-  if(!a){toast("MAC address لکھیں");return;}
-  if(macList.length>=MAC_MAX){toast("زیادہ سے زیادہ "+MAC_MAX+" MAC ایڈریس");return;}
-  macList.push({a:a,r:r});saveMac();
+  if(!a){toast("MAC لکھیں یا ڈیوائس چُنیں");return;}
+  if(!validMac(a)){toast("MAC درست نہیں (AA:BB:CC:DD:EE:FF)");return;}
+  var list=curList();
+  if(list.length>=MAC_MAX){toast("زیادہ سے زیادہ "+MAC_MAX);return;}
+  if(list.some(function(m){return m.a.toLowerCase()===a.toLowerCase();})){toast("یہ MAC پہلے سے موجود ہے");return;}
+  list.push({a:a.toUpperCase(),r:r});saveLists();
   document.getElementById("macIn").value="";document.getElementById("macRmk").value="";
-  renderMac();
-}
-function removeMac(i){macList.splice(i,1);saveMac();renderMac();}
-renderMac();
+  var pk=document.getElementById("macPick");if(pk)pk.value="";
+  renderAll();
+  toast((curMode==="black"?"Blacklist":"Whitelist")+" میں شامل: "+a.toUpperCase());
+};
+window.removeMac=function(i){curList().splice(i,1);saveLists();renderAll();};
+window.unblock=function(i){BLACK.splice(i,1);saveLists();renderAll();};
+(function(){
+  var pk=document.getElementById("macPick");if(!pk||typeof bw==="undefined")return;
+  bw.forEach(function(d){var o=document.createElement("option");o.value=d[2];o.textContent=d[0]+"  ("+d[2]+")";pk.appendChild(o);});
+  pk.addEventListener("change",function(){
+    if(!pk.value)return;
+    document.getElementById("macIn").value=pk.value;
+    document.getElementById("macRmk").value=pk.options[pk.selectedIndex].textContent.split("  (")[0];
+  });
+})();
+var _wm=document.getElementById("modeWhite");if(_wm&&_wm.checked)curMode="white";
+renderAll();
 
 /* ---- remember every toggle, limit & field across reloads ---- */
 (function(){
