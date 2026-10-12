@@ -596,11 +596,12 @@ renderPc();
 
 /* MAC Address Filter (black/white) + Blacklisted devices (demo) */
 var MAC_MAX=100;
-var BLACK_SEED=[{"a": "02:99:FD:AF:E5:93", "r": "Unknown"}, {"a": "02:25:3C:D6:54:AF", "r": "Fazu"}, {"a": "02:4D:FA:D7:14:27", "r": "TECNO-SPARK-Go"}, {"a": "02:A0:AE:B3:FE:E9", "r": "Unknown"}, {"a": "02:23:2F:8A:F2:21", "r": "V2149"}, {"a": "02:1F:9E:E4:91:C5", "r": "Unknown"}, {"a": "02:B1:0B:EC:B5:56", "r": "Unknown"}, {"a": "02:3B:FC:1E:6F:93", "r": "Infinix-SMART-10"}, {"a": "02:42:7E:CB:C8:FE", "r": "Mora"}, {"a": "02:29:55:E5:CD:8E", "r": "Unknown"}];
+var BLACK_SEED=[];
 var BLACK,WHITE,curMode="black";
-try{BLACK=JSON.parse(localStorage.getItem("tenda_black")||"null")||BLACK_SEED.slice();}catch(e){BLACK=BLACK_SEED.slice();}
-try{WHITE=JSON.parse(localStorage.getItem("tenda_white")||"[]");}catch(e){WHITE=[];}
-function saveLists(){try{localStorage.setItem("tenda_black",JSON.stringify(BLACK));localStorage.setItem("tenda_white",JSON.stringify(WHITE));}catch(e){}}
+try{localStorage.removeItem("tenda_black");localStorage.removeItem("tenda_white");}catch(e){}
+try{BLACK=JSON.parse(localStorage.getItem("tenda_black2")||"null")||BLACK_SEED.slice();}catch(e){BLACK=BLACK_SEED.slice();}
+try{WHITE=JSON.parse(localStorage.getItem("tenda_white2")||"[]");}catch(e){WHITE=[];}
+function saveLists(){try{localStorage.setItem("tenda_black2",JSON.stringify(BLACK));localStorage.setItem("tenda_white2",JSON.stringify(WHITE));}catch(e){}}
 function curList(){return curMode==="black"?BLACK:WHITE;}
 function renderBlDev(){
   var el=document.getElementById("blDevList");if(!el)return;
