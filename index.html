@@ -120,10 +120,10 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
 .conn .node div{font-size:12px;color:#777;margin-top:4px}
 .conn .link{flex:1;height:2px;background:#d9d9d9;margin:0 2px;margin-bottom:22px}
 .conn-ok{text-align:center;color:#6fb23a;font-size:13.5px;margin-top:6px}
-.speeds{display:flex;justify-content:space-around;text-align:center;gap:10px;flex-wrap:wrap}
-.speeds .big{font-size:30px;font-weight:700}
-.speeds .u{font-size:12px;color:#aaa;font-weight:400}
-.speeds .cap{font-size:12px;color:#888;margin-top:2px}
+.speeds{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:4px;align-items:start}
+.speeds .big{font-size:25px;font-weight:700;white-space:nowrap}
+.speeds .u{font-size:11px;color:#aaa;font-weight:400}
+.speeds .cap{font-size:11.5px;color:#888;margin-top:2px;white-space:nowrap}
 .n1{color:#2f9fe0}.n2{color:#7bc043}.n3{color:#f07c1a}
 .info-row{display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:13.5px}
 .info-row:last-child{border-bottom:0}
@@ -192,7 +192,7 @@ select.ctrl{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg x
   .nav-item{padding:15px 12px;font-size:15px}
   .row .lbl{flex-basis:100%}
 }
-.statTile{cursor:pointer;border-radius:8px;padding:4px 6px;transition:background .15s}
+.statTile{cursor:pointer;border-radius:8px;padding:6px 2px;transition:background .15s;min-width:0}
 .statTile:hover,.statTile:active{background:#f3f3f3}
 .statTile .cap{color:#888}
 .modalbg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:70}
