@@ -617,8 +617,8 @@ function renderMac(){
     return '<div class="macrow"><span class="mono">'+m.a+'</span><span class="rmk">'+(m.r||"")+'</span><button class="rm" onclick="removeMac('+i+')">&times;</button></div>';
   }).join('');
 }
-function renderAll(){renderMac();renderBlDev();}
-window.setMode=function(m){curMode=m;renderMac();};
+function renderAll(){renderMac();renderBlDev();refreshPicker();}
+window.setMode=function(m){curMode=m;renderAll();};
 function validMac(x){return /^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/.test(x);}
 window.addMac=function(){
   var a=document.getElementById("macIn").value.trim();
@@ -636,9 +636,20 @@ window.addMac=function(){
 };
 window.removeMac=function(i){curList().splice(i,1);saveLists();renderAll();};
 window.unblock=function(i){BLACK.splice(i,1);saveLists();renderAll();};
-(function(){
+function refreshPicker(){
   var pk=document.getElementById("macPick");if(!pk||typeof bw==="undefined")return;
-  bw.forEach(function(d){var o=document.createElement("option");o.value=d[2];o.textContent=d[0]+"  ("+d[2]+")";pk.appendChild(o);});
+  var list=curList();
+  pk.innerHTML='<option value="">— choose a connected device —</option>';
+  bw.forEach(function(d){
+    var inList=list.some(function(m){return m.a.toLowerCase()===String(d[2]).toLowerCase();});
+    var o=document.createElement("option");o.value=d[2];
+    o.textContent=d[0]+"  ("+d[2]+")"+(inList?"  ✓ already in "+(curMode==="black"?"blacklist":"whitelist"):"");
+    if(inList)o.disabled=true;
+    pk.appendChild(o);
+  });
+}
+(function(){
+  var pk=document.getElementById("macPick");if(!pk)return;
   pk.addEventListener("change",function(){
     if(!pk.value)return;
     document.getElementById("macIn").value=pk.value;
